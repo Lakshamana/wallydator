@@ -1,0 +1,5 @@
+{
+  "*.tsc": [
+    "npm run lintstaged"
+  ]
+}

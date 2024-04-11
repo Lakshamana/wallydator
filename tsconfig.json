@@ -1,0 +1,30 @@
+{
+ "compilerOptions": {
+   "incremental": true,
+   "outDir": "dist",
+   "declaration": true,
+   "rootDirs": ["./src", "./tests"],
+   "target": "es2021",
+   "sourceMap": true,
+   "skipLibCheck": true,
+   "forceConsistentCasingInFileNames": true,
+   "module": "commonjs",
+   "moduleResolution": "node",
+   "esModuleInterop": true,
+   "baseUrl": "./src",
+   "paths": {
+     "@/*": ["./*"],
+     "@/tests/*": ["../tests/*"]
+   },
+   "plugins": [
+     { "transform": "typescript-transform-paths", "afterDeclarations": true }
+   ],
+   "strict": true,
+   "noImplicitOverride": true,
+   "removeComments": true,
+   "emitDecoratorMetadata": true,
+   "experimentalDecorators": true
+ },
+ "include": ["./src", "./tests"],
+ "files": ["./index.ts"]
+}
