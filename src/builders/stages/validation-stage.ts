@@ -75,7 +75,7 @@ export class ValidationStage {
     this.checkSource()
     this.builder.addValidationPipeline(
       'date',
-      (val: any) => !!new Date(val).getDay
+      (val: any) => new Date(val).toString() !== 'Invalid Date'
     )
     return this
   }
