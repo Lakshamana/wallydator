@@ -1,8 +1,8 @@
 {
   "type": "commonjs",
   "dependencies": {
-    "date-and-time": "^3.1.1",
-    "module-alias": "^2.2.2"
+    "module-alias": "^2.2.2",
+    "rimraf": "^5.0.5"
   },
   "scripts": {
     "lint": "eslint .",
