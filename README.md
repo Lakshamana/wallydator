@@ -138,6 +138,8 @@ Every method below will return either a `ValidationStage` or a `ArrayValidationS
   - Checks whether the value is required if a given condition is met. Optionally can receive a reference to parent object, which useful for nested validations where you need to take into account a parent object field value
 - [equals](#equals-equalsvalue-validationstage)
   - Checks whether the value is equal to a given value. It will perform a strict comparison (=== operator)
+- [notequals](#notequals-value-validationstage)
+  - Checks whether the value is not equal to a given value. It will perform a strict comparison (!== operator)
 - [notEmptyObject](#notemptyobject--validationstage)
   - Checks whether the value is an object and it has at least one property
 - [min](#min-value-validationstage)
@@ -200,6 +202,12 @@ Parameters
 Parameters
 
 - equalsValue `any` - The value to be compared against field value
+
+### `equals (value): ValidationStage`
+
+Parameters
+
+- value `any` - The value to be compared against field value
 
 ### `notEmptyObject (): ValidationStage`
 
@@ -284,3 +292,8 @@ Parameters
 Parameters
 
 - callbackFn `(val: any) => boolean` - The callback to be called for each element in the array. This should return true if the validation passes
+
+## Contributing
+This project is open for contributions. Feel free to open an issue or a PR!
+
+Hope y'all enjoy it as much as I did creating it =)

@@ -115,6 +115,15 @@ export class ValidationStage {
     return this
   }
 
+  notEquals (value: any): ValidationStage {
+    this.checkSource()
+    this.builder.addValidationPipeline(
+      'notEquals',
+      (val: any) => val !== value
+    )
+    return this
+  }
+
   notEmptyObject (): ValidationStage {
     this.checkSource()
     this.builder.addValidationPipeline(

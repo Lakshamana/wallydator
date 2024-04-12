@@ -8,6 +8,7 @@ const source = {
   age: 16,
   hasParentsPermission: true,
   email: 'john.doe@email.com',
+  notEqualsThis: 'a-value',
   arrayField: [],
   nested: {
     data: 'nested data',
@@ -47,6 +48,7 @@ const validationFn = (src: Object): ValidationBuilder => {
           .build()
       )
     )
+    .field('notEqualsThis', (v) => v.notEquals('a-value'))
     .field('arrayField', (v) =>
       v
         .isArray()
@@ -76,19 +78,26 @@ const withArrayObject = {
 }
 
 const arrayWithObjectsValidation = Wallydator.from(withArrayObject)
-  .field('items', (v) => v.isArray().required().validateArray(array =>
-    array.for((item) =>
-      item
-        .isObject()
-        .required()
-        .validateNested((builder) =>
-          builder
-            .field('name', (v) => v.isString().required())
-            .field('age', (v) => v.isNumber().min(18))
-            .build()
-        )
-    ).build()
-  ))
+  .field('items', (v) =>
+    v
+      .isArray()
+      .required()
+      .validateArray((array) =>
+        array
+          .for((item) =>
+            item
+              .isObject()
+              .required()
+              .validateNested((builder) =>
+                builder
+                  .field('name', (v) => v.isString().required())
+                  .field('age', (v) => v.isNumber().min(18))
+                  .build()
+              )
+          )
+          .build()
+      )
+  )
   .build()
 
 console.error(checkValidation(source, validationFn))
