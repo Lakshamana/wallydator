@@ -68,21 +68,27 @@ const arrayValidation = Wallydator.fromArray(arraySource)
   .for((item) => item.isNumber().equals(3))
   .build()
 
-const arrayWithObjectsValidation = Wallydator.fromArray([
-  { name: 'John Doe', age: 18 },
-  { name: 'Jane Doe', age: 16 }
-])
-  .for((item) =>
-    item
-      .isObject()
-      .required()
-      .validateNested((builder) =>
-        builder
-          .field('name', (v) => v.isString().required())
-          .field('age', (v) => v.isNumber().min(18))
-          .build()
-      )
-  )
+const withArrayObject = {
+  items: [
+    { name: 'John Doe', age: 18 },
+    { name: 'Jane Doe', age: 16 }
+  ]
+}
+
+const arrayWithObjectsValidation = Wallydator.from(withArrayObject)
+  .field('items', (v) => v.isArray().required().validateArray(array =>
+    array.for((item) =>
+      item
+        .isObject()
+        .required()
+        .validateNested((builder) =>
+          builder
+            .field('name', (v) => v.isString().required())
+            .field('age', (v) => v.isNumber().min(18))
+            .build()
+        )
+    ).build()
+  ))
   .build()
 
 console.error(checkValidation(source, validationFn))
