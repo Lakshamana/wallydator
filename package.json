@@ -1,9 +1,5 @@
 {
   "type": "commonjs",
-  "dependencies": {
-    "module-alias": "^2.2.2",
-    "rimraf": "^5.0.5"
-  },
   "scripts": {
     "lint": "eslint .",
     "lintstaged": "npm run lint -- --fix",
@@ -34,6 +30,8 @@
     "husky": "^7.0.4",
     "jest": "^27.5.1",
     "lint-staged": "^12.4.1",
+    "module-alias": "^2.2.3",
+    "rimraf": "^5.0.5",
     "ts-jest": "^27.1.4",
     "ts-node": "^10.7.0",
     "ts-node-dev": "^1.1.8",

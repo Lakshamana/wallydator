@@ -5,7 +5,7 @@ import { ValidationError } from '@/interfaces'
 export class ValidationStage {
   constructor (protected readonly builder: ValidationBuilder) {}
 
-  checkUndefined (val: any): boolean {
+  private checkUndefined (val: any): boolean {
     return val === undefined
   }
 
