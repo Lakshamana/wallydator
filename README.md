@@ -13,7 +13,7 @@ const source = {
   hasParentsPermission: true, // good boy
 };
 
-const errors = ValidationBuilder.from(source)
+> Wallydator.from(source)
   .field('name', (v) => v.isString().required().equals('John Doe'))
   .field('age', (v) => v.required().isNumber())
   .field('email', (v) => v.isString().required().email())
@@ -24,9 +24,25 @@ const errors = ValidationBuilder.from(source)
       .equals(true),
   )
   .build();
+
+null  // pass
 ```
 
-Pro-tip: take a look at `src/mocks/index.ts`!
+```ts
+> Wallydator.from({ fruits: ['apple', 'grapes', 'kiwi'] })
+  .field('fruits', v => v
+    .required()
+    .isArray()
+    .validateArray(array =>
+      array.root(r => r.includes('pineapple')).build()
+    )
+  )
+  .build()
+
+{ 'fruits': ['includes'] }  // error
+```
+
+Pro-tip: take a look at [src/mocks/index.ts](src/mocks/index.ts). You may run this mock by cloning this repo and running `npm run dev`.
 
 ## Builder API
 
@@ -37,7 +53,11 @@ Pro-tip: take a look at `src/mocks/index.ts`!
 - [field](#field-field-validatorfn-objectvalidationbuilder)
   - Adds a new field to the validation process
 - [build](#build--validationerror--null)
-  - Runs the validation process and returns an object of errors. If the validation passes, it will return null
+  - Runs the validation process and returns an object of errors. If the validation passes, it will return null. Will throw `NoSourceDefined` error if the source is not defined (`null` | `undefined`)
+- [for](#for-validationfn-validationfunction-arrayvalidationbuilder)
+  - Adds a new validation stage for each item in the array. It will pass an `ValidationStage` instance as an argument for the callback function, which means you may compose its argument with every function that returns `ValidationStage`, check the [Validation API](#validation-api) for a list of available methods
+- [root](#root-validationfn-arrayvalidationfunction-arrayvalidationbuilder)
+  - Adds a new validation stage to the root array validation process. It will pass an `ArrayValidationStage` instance as an argument for the callback function, which means you may compose its argument with every function that returns `ArrayValidationStage`, check the [Array Root Validation API](#array-root-validation-api) for a list of available methods
 
 ### `from (source): ObjectValidationBuilder`
 
@@ -73,9 +93,9 @@ Returns
 Example:
 
 ```ts
-Wallydator.from({ name: 'John Doe', age: 18 })
-  .field('name', (v) => v.isString().required())
-  .field('age', (v) => v.isNumber().min(18))
+Wallydator.from({ name: "John Doe", age: 18 })
+  .field("name", (v) => v.isString().required())
+  .field("age", (v) => v.isNumber().min(18))
   .build();
 ```
 
@@ -85,7 +105,7 @@ Returns
 
 `ValidationError | null` - Object describing each error found during the validation process.
 
-Examples
+Examples:
 
 ```ts
 > Wallydator.from({ name: 'John Doe', age: 18 })
@@ -114,9 +134,46 @@ null  // pass
 { '1.age': ['min'] }  // error on the second item
 ```
 
+### `root (validationFn: ArrayValidationFunction): ArrayValidationBuilder`
+Parameters
+
+- validatorFn `(validator: ArrayValidationStage) => ArrayValidationStage` - The validation function to be applied to the array root object (that is, the array itself, not its elements)
+
+Returns
+
+`ArrayValidationBuilder` - Array root validation instance
+
+Example:
+```ts
+> Wallydator.fromArray([])
+    .root(r => r.notEmptyArray())
+    .build()
+
+// Notice that root validation errors will be displayed as '$root' if the source is an array, and as the field name if it's an object
+{ $root: ['notEmptyArray'] }  // error on the root
+```
+
+### `for (validationFn: ValidationFunction): ArrayValidationBuilder`
+Parameters
+
+- validatorFn `(validator: ValidationStage) => ValidationStage` - The validation function to be applied for every root element
+
+Returns
+
+`ArrayValidationBuilder` - Array root validation instance
+
+Example:
+```ts
+> Wallydator.fromArray([1, 2, 3, 4, 5])
+    .for((item) => item.isNumber().min(1).max(3))
+    .build()
+
+{ '3': [ 'max' ], '4': [ 'max' ] }  // errors in the indexes 3 and 4
+```
+
 ## Validation API
 
-Every method below will return either a `ValidationStage` or a `ArrayValidationStage` instance. The `ValidationStage` is used to validate single values, whereas the `ValidationStageArray` is used to validate arrays. Any of these will throw `NoSourceDefined` error if the source is not defined (`null` | `undefined`)
+Every method below will return either a `ValidationStage` or an `ArrayValidationStage` instance. The `ValidationStage` is used to validate single values, whereas the `ArrayValidationStage` is used to validate arrays. Please notice that every method, except `required` will return `true` if the targeted value is `undefined`: this is not a bug, but rather a feature that allows you to define validations for optional fields, so if you have to validate the presence of a field, use `required` method.
 
 - [isString](#isstring--validationstage)
   - Checks whether the value is a string
@@ -138,7 +195,7 @@ Every method below will return either a `ValidationStage` or a `ArrayValidationS
   - Checks whether the value is required if a given condition is met. Optionally can receive a reference to parent object, which useful for nested validations where you need to take into account a parent object field value
 - [equals](#equals-equalsvalue-validationstage)
   - Checks whether the value is equal to a given value. It will perform a strict comparison (=== operator)
-- [notequals](#notequals-value-validationstage)
+- [notEquals](#notequals-value-validationstage)
   - Checks whether the value is not equal to a given value. It will perform a strict comparison (!== operator)
 - [notEmptyObject](#notemptyobject--validationstage)
   - Checks whether the value is an object and it has at least one property
@@ -158,10 +215,16 @@ Every method below will return either a `ValidationStage` or a `ArrayValidationS
   - Checks whether the value is a valid email address
 - [custom](#custom-callbackfn-validationstage)
   - Allows you to define a custom validation function. The function must return a boolean value and return true if the validation passes
+- [compareToField](#comparetofield-field-callbackfn-label-validationstage)
+  - Allows you to compare the value to another source field value. It will display the error as `'compareToField:${label}'` if a label is found, otherwise `'compareToField:${field}'`
 - [validateNested](#validatenested-callbackfn-validationstage)
-  - Allows you to validate nested objects. You may validate as many nest levels as you need
+  - Allows you to validate nested objects. You may validate as many nest levels as you need. Works the same as `from`. In fact, both will pass an `ObjectValidationBuilder` instance as an argument for the callback function
 - [validateArray](#validatearray-callbackfn-validationstage)
-  - Allows you to validate arrays
+  - Allows you to validate arrays. Works the same as `fromArray`. In fact, both will pass an `ArrayValidationBuilder` instance as an argument for the callback function
+
+#### Array root validation API
+The methods below are meant to be used for the root array validation only. They will return an `ArrayValidationStage` instance.
+
 - [notEmptyArray](notemptyarray--arrayvalidationstage)
   - Checks whether the value is an array and it has at least one element
 - [includes](#includes-value-arrayvalidationstage)
@@ -203,7 +266,7 @@ Parameters
 
 - equalsValue `any` - The value to be compared against field value
 
-### `equals (value): ValidationStage`
+### `notEquals (value): ValidationStage`
 
 Parameters
 
@@ -255,6 +318,14 @@ Parameters
 
 - callbackFn `(value: any) => boolean` - The custom validation function. It must return true if the validation passes
 
+### `compareToField (field, callbackFn, label?): ValidationStage`
+
+Parameters
+
+- field `string` - The field name whose value will be compared against current field
+- callbackFn `callbackFn: (val: any, [field]: any) => boolean` - The function that will be called to compare the field values. It must return true if the validation passes
+- label? `string` - The label to display the error. Ex: for `label = 'hasToBeGreatherThan'` it will display the error as `compareToField:hasToBeGreatherThan`
+
 ### `validateNested (callbackFn): ValidationStage`
 
 Parameters
@@ -294,6 +365,7 @@ Parameters
 - callbackFn `(val: any) => boolean` - The callback to be called for each element in the array. This should return true if the validation passes
 
 ## Contributing
+
 This project is open for contributions. Feel free to open an issue or a PR!
 
 Hope y'all enjoy it as much as I did creating it =)
