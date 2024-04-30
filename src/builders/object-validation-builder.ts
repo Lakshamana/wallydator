@@ -75,6 +75,11 @@ export class ObjectValidationBuilder extends ValidationBuilder {
       }
     })
 
-    return Object.keys(errors).length ? errors : null
+    const filteredErrors = Object.keys(errors).reduce((acc, k) => ({
+      ...acc,
+      [k.endsWith('.$root') ? k.replace('.$root', '') : k]: errors[k]
+    }), {})
+
+    return Object.keys(filteredErrors).length ? filteredErrors : null
   }
 }

@@ -74,7 +74,7 @@ export class ArrayValidationBuilder extends ValidationBuilder {
       }
     })
 
-    if (Object.keys(rootErrors).length) return { '.': rootErrors }
+    if (Object.keys(rootErrors).length) return { $root: rootErrors }
 
     const errors: ValidationError = {}
     this.validationPipeline.forEach(({ validationFn, validationName }) => {

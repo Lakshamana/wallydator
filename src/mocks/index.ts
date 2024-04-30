@@ -66,7 +66,7 @@ function checkValidation (
 
 const arraySource: any[] = [0, 1, 2, 3, 4]
 const arrayValidation = Wallydator.fromArray(arraySource)
-  .root(r => r.notEmptyArray())
+  .root(r => r.minLength(10))
   .for((item) => item.isNumber().required().max(3))
   .build()
 
@@ -120,6 +120,17 @@ const arrayWithObjectsValidation = Wallydator.from(withArrayObject)
   )
   .build()
 
+const testArray = Wallydator.from({ fruits: ['apple', 'grapes', 'kiwi'] })
+  .field('fruits', v => v
+    .required()
+    .isArray()
+    .validateArray(array =>
+      array.root(r => r.includes('pineapple')).build()
+    )
+  )
+  .build()
+
+console.log(testArray)
 console.error(checkValidation(source, validationFn))
 console.error(arrayValidation)
 console.error(arrayWithObjectsValidation)
