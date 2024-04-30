@@ -49,12 +49,11 @@ const validationFn = (src: Object): ValidationBuilder => {
       )
     )
     .field('notEqualsThis', (v) => v.notEquals('a-value'))
-    .field('arrayField', (v) =>
-      v
-        .isArray()
-        .required()
-        .minLength(1)
-        .validateArray((array) => array.for((item) => item.min(3)).build())
+    .field('arrayField', (v) => v
+      .isArray()
+      .required()
+      .minLength(1)
+      .validateArray((array) => array.for((item) => item.min(3)).build())
     )
 }
 
@@ -65,38 +64,59 @@ function checkValidation (
   return validationWrapper(src).build()
 }
 
-const arraySource = [1, 2, 3, 4, 5]
+const arraySource: any[] = [0, 1, 2, 3, 4]
 const arrayValidation = Wallydator.fromArray(arraySource)
-  .for((item) => item.isNumber().equals(3))
+  .root(r => r.notEmptyArray())
+  .for((item) => item.isNumber().required().max(3))
   .build()
 
 const withArrayObject = {
   items: [
-    { name: 'John Doe', age: 18 },
-    { name: 'Jane Doe', age: 16 }
+    {
+      name: 'John Doe',
+      age: 18,
+      country: 'USA',
+      stateCount: 50,
+      startDate: new Date('2017-02-01 00:00:00'),
+      endDate: new Date('2017-02-01 00:00:00')
+    },
+    {
+      name: 'Jane Doe',
+      age: 16,
+      country: 'BRA',
+      stateCount: 27,
+      startDate: undefined,
+      endDate: new Date('2017-03-01 00:00:00')
+    }
   ]
 }
 
 const arrayWithObjectsValidation = Wallydator.from(withArrayObject)
-  .field('items', (v) =>
-    v
-      .isArray()
-      .required()
-      .validateArray((array) =>
-        array
-          .for((item) =>
-            item
-              .isObject()
-              .required()
-              .validateNested((builder) =>
-                builder
-                  .field('name', (v) => v.isString().required())
-                  .field('age', (v) => v.isNumber().min(18))
-                  .build()
-              )
+  .field('items', (v) => v
+    .isArray()
+    .validateArray((array) => array
+      .root(r => r.maxLength(2))
+      .for((item) => item
+        .isObject()
+        .required()
+        .validateNested((builder) => builder
+          .field('name', (v) => v.isString().required())
+          .field('age', (v) => v.isNumber().min(18))
+          .field('country', v => v.isString().required())
+          .field('stateCount', v => v
+            .custom((stateCount, $source) => $source.country === 'USA' ? stateCount === 50 : stateCount === 26)
+          )
+          .field('startDate', v => v.isDate().required())
+          .field('endDate', v => v
+            .isDate()
+            .required()
+            .compareToField('startDate', (endDate, startDate) => endDate > startDate, 'hasToBeGreaterThan')
           )
           .build()
+        )
       )
+      .build()
+    )
   )
   .build()
 

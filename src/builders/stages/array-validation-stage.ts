@@ -1,10 +1,11 @@
-import { ValidationStage } from '@/builders/stages'
 import { ValidationTestFn } from '@/interfaces'
+import { ArrayValidationBuilder } from '@/builders'
 
-export class ArrayValidationStage extends ValidationStage {
+export class ArrayValidationStage {
+  constructor (protected readonly builder: ArrayValidationBuilder) {}
+
   notEmptyArray (): ArrayValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline(
+    this.builder.addRootValidationPipeline(
       'notEmpty',
       (val: any[]) => !!val.length
     )
@@ -12,33 +13,54 @@ export class ArrayValidationStage extends ValidationStage {
   }
 
   includes (value: any): ArrayValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('includes', (val: any[]) =>
+    this.builder.addRootValidationPipeline('includes', (val: any[]) =>
       val.includes(value)
     )
     return this
   }
 
   includesAll (values: any[]): ArrayValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('includesAll', (val: any[]) =>
+    this.builder.addRootValidationPipeline('includesAll', (val: any[]) =>
       values.every((value) => val.includes(value))
     )
     return this
   }
 
   every (callbackFn: (val: any) => boolean): ArrayValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('every', (val: any[]) =>
+    this.builder.addRootValidationPipeline('every', (val: any[]) =>
       val.every(callbackFn)
     )
     return this
   }
 
   some (callbackFn: ValidationTestFn): ArrayValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('some', (val: any[]) =>
+    this.builder.addRootValidationPipeline('some', (val: any[]) =>
       val.some(callbackFn)
+    )
+    return this
+  }
+
+  length (length: number): ArrayValidationStage {
+    this.builder.addRootValidationPipeline(
+      'length',
+      (val: string) => val.length === length
+    )
+
+    return this
+  }
+
+  minLength (min: number): ArrayValidationStage {
+    this.builder.addRootValidationPipeline(
+      'minLength',
+      (val: string | any[]) => val.length >= min
+    )
+    return this
+  }
+
+  maxLength (max: number): ArrayValidationStage {
+    this.builder.addRootValidationPipeline(
+      'maxLength',
+      (val: string | any[]) => val.length <= max
     )
     return this
   }

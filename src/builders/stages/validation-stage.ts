@@ -1,87 +1,81 @@
 import { ValidationBuilder } from '@/builders/abstract'
 import { ArrayValidationBuilder, ObjectValidationBuilder } from '@/builders'
-import { NoSourceDefined } from '@/errors'
 import { ValidationError } from '@/interfaces'
 
 export class ValidationStage {
   constructor (protected readonly builder: ValidationBuilder) {}
 
-  protected checkSource (): void {
-    if (!this.builder.getSource()) throw new NoSourceDefined()
+  checkUndefined (val: any): boolean {
+    return val === undefined
   }
 
   isString (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'isString',
-      (val: any) => typeof val === 'string'
+      (val: any) => this.checkUndefined(val) || typeof val === 'string'
     )
     return this
   }
 
   isNumber (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'isNumber',
-      (val: any) => typeof val === 'number'
+      (val: any) => this.checkUndefined(val) || typeof val === 'number'
     )
     return this
   }
 
   isInteger (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'isInteger',
-      (val: number) => !isNaN(val) && Number.isInteger(val)
+      (val: any) =>
+        this.checkUndefined(val) ||
+        (!isNaN(val) && Number.isInteger(val))
     )
     return this
   }
 
   isNumeric (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline('isNumeric', isNaN)
     return this
   }
 
   isBoolean (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'isBoolean',
-      (val: any) => typeof val === 'boolean'
+      (val: any) => this.checkUndefined(val) || typeof val === 'boolean'
     )
     return this
   }
 
   isObject (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'isObject',
       (val: any) =>
-        typeof val === 'object' && !Array.isArray(val) && val !== null
+        this.checkUndefined(val) ||
+        (typeof val === 'object' && !Array.isArray(val) && val !== null)
     )
     return this
   }
 
   isArray (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'isArray',
-      (val: any) => typeof val === 'object' && Array.isArray(val)
+      (val: any) =>
+        this.checkUndefined(val) || (typeof val === 'object' && Array.isArray(val))
     )
     return this
   }
 
   isDate (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'date',
-      (val: any) => new Date(val).toString() !== 'Invalid Date'
+      (val: any) => this.checkUndefined(val) || !!new Date(val).getDay
     )
     return this
   }
 
   required (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'required',
       (val: any) => !['', null, undefined].includes(val)
@@ -94,7 +88,6 @@ export class ValidationStage {
     callbackFn: (value: any) => boolean,
     base?: ValidationBuilder
   ): ValidationStage {
-    this.checkSource()
     const useBase = base ?? this.builder
 
     this.builder.addValidationPipeline(
@@ -107,16 +100,13 @@ export class ValidationStage {
   }
 
   equals (equalsValue: any): ValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline(
-      'equals',
-      (val: any) => val === equalsValue
+    this.builder.addValidationPipeline('equals', (val: any) =>
+      [equalsValue, undefined].includes(val)
     )
     return this
   }
 
   notEquals (value: any): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'notEquals',
       (val: any) => val !== value
@@ -125,62 +115,54 @@ export class ValidationStage {
   }
 
   notEmptyObject (): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'notEmpty',
-      (val: Object) => !!Object.keys(val).keys
+      (val: Object) => this.checkUndefined(val) || !!Object.keys(val)?.length
     )
     return this
   }
 
   min (minValue: number): ValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('min', (val: number) => val >= minValue)
+    this.builder.addValidationPipeline('min', (val: number) => this.checkUndefined(val) || val >= minValue)
     return this
   }
 
   max (maxValue: number): ValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('max', (val: number) => val <= maxValue)
+    this.builder.addValidationPipeline('max', (val: number) => this.checkUndefined(val) || val <= maxValue)
     return this
   }
 
   length (length: number): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'length',
-      (val: string) => val.length === length
+      (val: string) => this.checkUndefined(val) || val.length === length
     )
     return this
   }
 
   minLength (min: number): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'minLength',
-      (val: string | any[]) => val.length >= min
+      (val: string) => this.checkUndefined(val) || val.length >= min
     )
     return this
   }
 
   maxLength (max: number): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline(
       'maxLength',
-      (val: string | any[]) => val.length <= max
+      (val: string) => this.checkUndefined(val) || val.length <= max
     )
     return this
   }
 
   regex (pattern: RegExp): ValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('regex', pattern.test)
+    this.builder.addValidationPipeline('regex', (val: string) => this.checkUndefined(val) || pattern.test(val))
     return this
   }
 
   email (): ValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('email', (val: string) =>
+    this.builder.addValidationPipeline('email', (val: string) => this.checkUndefined(val) ||
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
         String(val).toLowerCase()
       )
@@ -188,9 +170,22 @@ export class ValidationStage {
     return this
   }
 
-  custom (callbackFn: (val: any) => boolean): ValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('custom', callbackFn)
+  custom (callbackFn: (val: any, $source: any) => boolean): ValidationStage {
+    this.builder.addValidationPipeline('custom', (val) =>
+      this.checkUndefined(val) || callbackFn(val, this.builder.getSource())
+    )
+    return this
+  }
+
+  compareToField (
+    field: string,
+    callbackFn: (val: any, [field]: any) => boolean,
+    label?: string
+  ): ValidationStage {
+    const compareAgainstValue = this.builder.getSource()[field]
+    this.builder.addValidationPipeline(`compareToField:${label ?? field}`, (val: any) =>
+      this.checkUndefined(val) || this.checkUndefined(compareAgainstValue) || callbackFn(val, compareAgainstValue)
+    )
     return this
   }
 
@@ -200,9 +195,8 @@ export class ValidationStage {
       parent: ValidationBuilder,
     ) => ValidationError | null
   ): ValidationStage {
-    this.checkSource()
     this.builder.addValidationPipeline('validateNested', (val: Object) =>
-      callbackFn(new ObjectValidationBuilder().from(val), this.builder)
+      this.checkUndefined(val) || callbackFn(new ObjectValidationBuilder().from(val), this.builder)
     )
     return this
   }
@@ -213,9 +207,8 @@ export class ValidationStage {
       parent?: ValidationBuilder | ArrayValidationBuilder,
     ) => ValidationError | null
   ): ValidationStage {
-    this.checkSource()
-    this.builder.addValidationPipeline('for', (val: any[]) =>
-      callbackFn(new ArrayValidationBuilder().from(val), this.builder)
+    this.builder.addValidationPipeline('validateArray', (val: any[]) =>
+      this.checkUndefined(val) || callbackFn(new ArrayValidationBuilder().from(val), this.builder)
     )
     return this
   }

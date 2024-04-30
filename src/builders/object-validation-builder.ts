@@ -1,7 +1,8 @@
 import { ValidationFunction } from '@/types'
 import { ValidationBuilder } from '@/builders/abstract'
-import { ValidationStage } from '@/builders/stages'
 import { ValidationError, ValidationStageDescriptor, ValidationTestFn } from '@/interfaces'
+import { NoSourceDefined } from '@/errors'
+import { ValidationStage } from './stages'
 
 export class ObjectValidationBuilder extends ValidationBuilder {
   protected readonly validationPipelines: Map<string, ValidationStageDescriptor[]> = new Map([])
@@ -34,7 +35,15 @@ export class ObjectValidationBuilder extends ValidationBuilder {
     return this
   }
 
+  public getCurrentValue (): any {
+    return this.source[this.fieldName]
+  }
+
   build (): ValidationError | null {
+    if (!this.source) {
+      throw new NoSourceDefined()
+    }
+
     const errors: ValidationError = {}
 
     this.validationPipelines.forEach((validations, key) => {
@@ -54,12 +63,13 @@ export class ObjectValidationBuilder extends ValidationBuilder {
             errors[key] ||= []
             errors[key].push(validationName)
           } else if (resultIsObject) {
-            const [firstError] = Object.keys(result)
-            const [validationError] = result[firstError]
-            const concatKey = `${key}.${firstError}`
+            Object.keys(result).forEach(errorKey => {
+              const errorList = result[errorKey]
+              const concatKey = `${key}.${errorKey}`.replace(/(.*)\.$/g, '$1')
 
-            errors[concatKey] ||= []
-            errors[concatKey].push(validationError)
+              errors[concatKey] ||= []
+              errors[concatKey].push(...errorList)
+            })
           }
         }
       }
