@@ -3,6 +3,7 @@ import './config/module-alias'
 import { ArrayValidationBuilder, ObjectValidationBuilder } from './builders'
 
 export { ValidationBuilder } from './builders/abstract/validation-builder'
+export { ValidationBuilderWrapper } from './types'
 
 export class Wallydator {
   static from (source: Object): ObjectValidationBuilder {
