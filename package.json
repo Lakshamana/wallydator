@@ -38,7 +38,7 @@
     "ttypescript": "^1.5.15",
     "typescript-transform-paths": "^3.4.7"
   },
-  "name": "wallydator",
+  "name": "@lakshamana.dev/wallydator",
   "description": "",
   "version": "1.0.0",
   "main": "./dist/index.js",
