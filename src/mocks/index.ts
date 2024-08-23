@@ -49,11 +49,12 @@ const validationFn = (src: Object): ValidationBuilder => {
       )
     )
     .field('notEqualsThis', (v) => v.notEquals('a-value'))
-    .field('arrayField', (v) => v
-      .isArray()
-      .required()
-      .minLength(1)
-      .validateArray((array) => array.for((item) => item.min(3)).build())
+    .field('arrayField', (v) =>
+      v
+        .isArray()
+        .required()
+        .minLength(1)
+        .validateArray((array) => array.for((item) => item.min(3)).build())
     )
 }
 
@@ -66,7 +67,7 @@ function checkValidation (
 
 const arraySource: any[] = [0, 1, 2, 3, 4]
 const arrayValidation = Wallydator.fromArray(arraySource)
-  .root(r => r.minLength(10))
+  .root((r) => r.minLength(10))
   .for((item) => item.isNumber().required().max(3))
   .build()
 
@@ -92,41 +93,53 @@ const withArrayObject = {
 }
 
 const arrayWithObjectsValidation = Wallydator.from(withArrayObject)
-  .field('items', (v) => v
-    .isArray()
-    .validateArray((array) => array
-      .root(r => r.maxLength(2))
-      .for((item) => item
-        .isObject()
-        .required()
-        .validateNested((builder) => builder
-          .field('name', (v) => v.isString().required())
-          .field('age', (v) => v.isNumber().min(18))
-          .field('country', v => v.isString().required())
-          .field('stateCount', v => v
-            .custom((stateCount, $source) => $source.country === 'USA' ? stateCount === 50 : stateCount === 26)
-          )
-          .field('startDate', v => v.isDate().required())
-          .field('endDate', v => v
-            .isDate()
+  .field('items', (v) =>
+    v.isArray().validateArray((array) =>
+      array
+        .root((r) => r.maxLength(2))
+        .for((item) =>
+          item
+            .isObject()
             .required()
-            .compareToField('startDate', (endDate, startDate) => endDate > startDate, 'hasToBeGreaterThan')
-          )
-          .build()
+            .validateNested((builder) =>
+              builder
+                .field('name', (v) => v.isString().required())
+                .field('age', (v) => v.isNumber().min(18))
+                .field('country', (v) => v.isString().required())
+                .field('stateCount', (v) =>
+                  v.custom((stateCount, $source) =>
+                    $source.country === 'USA'
+                      ? stateCount === 50
+                      : stateCount === 26
+                  )
+                )
+                .field('startDate', (v) => v.isDate().required())
+                .field('endDate', (v) =>
+                  v
+                    .isDate()
+                    .required()
+                    .compareToField(
+                      'startDate',
+                      (endDate, startDate) => endDate > startDate,
+                      'hasToBeGreaterThan'
+                    )
+                )
+                .build()
+            )
         )
-      )
-      .build()
+        .build()
     )
   )
   .build()
 
 const testArray = Wallydator.from({ fruits: ['apple', 'grapes', 'kiwi'] })
-  .field('fruits', v => v
-    .required()
-    .isArray()
-    .validateArray(array =>
-      array.root(r => r.includes('pineapple')).build()
-    )
+  .field('fruits', (v) =>
+    v
+      .required()
+      .isArray()
+      .validateArray((array) =>
+        array.root((r) => r.includes('pineapple')).build()
+      )
   )
   .build()
 

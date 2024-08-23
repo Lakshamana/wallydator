@@ -1,10 +1,17 @@
 import { ArrayValidationFunction, ValidationFunction } from '@/types'
-import { ValidationError, ValidationStageDescriptor, ValidationTestFn } from '@/interfaces'
+import {
+  ArrayValidationBuilderContract,
+  ValidationError,
+  ValidationStageDescriptor,
+  ValidationTestFn
+} from '@/interfaces'
 import { ValidationBuilder } from '@/builders/abstract'
 import { ArrayValidationStage, ValidationStage } from '@/builders/stages'
 import { NoSourceDefined } from '@/errors'
 
-export class ArrayValidationBuilder extends ValidationBuilder {
+export class ArrayValidationBuilder
+  extends ValidationBuilder
+  implements ArrayValidationBuilderContract {
   private readonly validationPipeline: ValidationStageDescriptor[] = []
   private readonly rootValidationPipeline: ValidationStageDescriptor[] = []
 
@@ -54,7 +61,8 @@ export class ArrayValidationBuilder extends ValidationBuilder {
     this.rootValidationPipeline.forEach(({ validationFn, validationName }) => {
       let hasError = false
       const result = validationFn(this.source)
-      const resultIsObject = typeof result === 'object' && result && Object.keys(result).length
+      const resultIsObject =
+        typeof result === 'object' && result && Object.keys(result).length
 
       if (result === false) {
         hasError = true
@@ -81,7 +89,8 @@ export class ArrayValidationBuilder extends ValidationBuilder {
       this.getSource().forEach((item, idx) => {
         let hasError = false
         const result = validationFn(item)
-        const resultIsObject = typeof result === 'object' && result && Object.keys(result).length
+        const resultIsObject =
+          typeof result === 'object' && result && Object.keys(result).length
 
         if (result === false) {
           hasError = true
@@ -94,7 +103,7 @@ export class ArrayValidationBuilder extends ValidationBuilder {
             errors[idx] ||= []
             errors[idx].push(validationName)
           } else if (resultIsObject) {
-            Object.keys(result).forEach(errorKey => {
+            Object.keys(result).forEach((errorKey) => {
               const errorList = result[errorKey]
               const concatKey = `${idx}.${errorKey}`.replace(/(.*)\.$/g, '$1')
 

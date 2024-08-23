@@ -1,11 +1,19 @@
 import { ValidationFunction } from '@/types'
 import { ValidationBuilder } from '@/builders/abstract'
-import { ValidationError, ValidationStageDescriptor, ValidationTestFn } from '@/interfaces'
+import {
+  ObjectValidationBuilderContract,
+  ValidationError,
+  ValidationStageDescriptor,
+  ValidationTestFn
+} from '@/interfaces'
 import { NoSourceDefined } from '@/errors'
 import { ValidationStage } from './stages'
 
-export class ObjectValidationBuilder extends ValidationBuilder {
+export class ObjectValidationBuilder
+  extends ValidationBuilder
+  implements ObjectValidationBuilderContract {
   protected readonly validationPipelines: Map<string, ValidationStageDescriptor[]> = new Map([])
+
   protected fieldName: string = ''
 
   public setNewValidationPipeline (fieldName: string): void {
@@ -13,7 +21,7 @@ export class ObjectValidationBuilder extends ValidationBuilder {
     this.validationPipelines.set(fieldName, [])
   }
 
-  public override addValidationPipeline (
+  public addValidationPipeline (
     validationName: string,
     validationFn: ValidationTestFn
   ): void {
@@ -50,7 +58,8 @@ export class ObjectValidationBuilder extends ValidationBuilder {
       for (const { validationName, validationFn } of validations) {
         let hasError = false
         const result = validationFn(this.source[key])
-        const resultIsObject = typeof result === 'object' && result && Object.keys(result).length
+        const resultIsObject =
+          typeof result === 'object' && result && Object.keys(result).length
 
         if (result === false) {
           hasError = true
@@ -63,7 +72,7 @@ export class ObjectValidationBuilder extends ValidationBuilder {
             errors[key] ||= []
             errors[key].push(validationName)
           } else if (resultIsObject) {
-            Object.keys(result).forEach(errorKey => {
+            Object.keys(result).forEach((errorKey) => {
               const errorList = result[errorKey]
               const concatKey = `${key}.${errorKey}`.replace(/(.*)\.$/g, '$1')
 
@@ -75,10 +84,13 @@ export class ObjectValidationBuilder extends ValidationBuilder {
       }
     })
 
-    const filteredErrors = Object.keys(errors).reduce((acc, k) => ({
-      ...acc,
-      [k.endsWith('.$root') ? k.replace('.$root', '') : k]: errors[k]
-    }), {})
+    const filteredErrors = Object.keys(errors).reduce(
+      (acc, k) => ({
+        ...acc,
+        [k.endsWith('.$root') ? k.replace('.$root', '') : k]: errors[k]
+      }),
+      {}
+    )
 
     return Object.keys(filteredErrors).length ? filteredErrors : null
   }
