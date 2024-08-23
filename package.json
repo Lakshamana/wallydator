@@ -44,8 +44,8 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Lakshamana",
+  "license": "MIT",
   "files": [
     "./dist"
   ]
