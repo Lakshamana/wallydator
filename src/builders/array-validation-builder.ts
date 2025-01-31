@@ -33,12 +33,12 @@ export class ArrayValidationBuilder
     this.rootValidationPipeline.push({ validationName, validationFn })
   }
 
-  root(validationFn: ArrayValidationFunction): ArrayValidationBuilder {
+  root(validationFn: (validator: ArrayValidationStage) => ArrayValidationStage): ArrayValidationBuilder {
     validationFn(new ArrayValidationStage(this))
     return this
   }
 
-  for(validationFn: ValidationFunction): ArrayValidationBuilder {
+  for(validationFn: (validator: ValidationStage) => ValidationStage): ArrayValidationBuilder {
     validationFn(new ValidationStage(this))
     return this
   }
