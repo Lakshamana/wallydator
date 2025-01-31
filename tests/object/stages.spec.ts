@@ -109,10 +109,10 @@ describe('ValidationStage', () => {
     )
   })
 
-  test('notEmptyObject should add correct validation', () => {
-    validationStage.notEmptyObject()
+  test('isNotEmpty should add correct validation', () => {
+    validationStage.isNotEmpty()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
-      'notEmpty',
+      'isNotEmpty',
       expect.any(Function)
     )
   })

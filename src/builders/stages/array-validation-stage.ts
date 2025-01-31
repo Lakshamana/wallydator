@@ -4,9 +4,9 @@ import { ArrayValidationBuilder } from '@/builders'
 export class ArrayValidationStage {
   constructor (protected readonly builder: ArrayValidationBuilder) {}
 
-  notEmptyArray (): ArrayValidationStage {
+  isNotEmpty (): ArrayValidationStage {
     this.builder.addRootValidationPipeline(
-      'notEmpty',
+      'isNotEmpty',
       (val: any[]) => !!val.length
     )
     return this
