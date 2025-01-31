@@ -4,50 +4,45 @@ import {
   ObjectValidationBuilderContract,
   ValidationError,
   ValidationStageDescriptor,
-  ValidationTestFn
+  ValidationTestFn,
 } from '@/interfaces'
 import { NoSourceDefined } from '@/errors'
 import { ValidationStage } from './stages'
 
 export class ObjectValidationBuilder
   extends ValidationBuilder
-  implements ObjectValidationBuilderContract {
+  implements ObjectValidationBuilderContract
+{
   protected readonly validationPipelines: Map<string, ValidationStageDescriptor[]> = new Map([])
 
   protected fieldName: string = ''
 
-  public setNewValidationPipeline (fieldName: string): void {
+  public setNewValidationPipeline(fieldName: string): void {
     this.fieldName = fieldName
     this.validationPipelines.set(fieldName, [])
   }
 
-  public addValidationPipeline (
-    validationName: string,
-    validationFn: ValidationTestFn
-  ): void {
+  public addValidationPipeline(validationName: string, validationFn: ValidationTestFn): void {
     const validationPipeline = this.validationPipelines.get(this.fieldName)
     validationPipeline?.push({ validationName, validationFn })
   }
 
-  from (source: Object): ObjectValidationBuilder {
+  from(source: Object): ObjectValidationBuilder {
     this.source = source
     return this
   }
 
-  field (
-    fieldName: string,
-    validationFn: ValidationFunction
-  ): ObjectValidationBuilder {
+  field(fieldName: string, validationFn: ValidationFunction): ObjectValidationBuilder {
     this.setNewValidationPipeline(fieldName)
     validationFn(new ValidationStage(this))
     return this
   }
 
-  public getCurrentValue (): any {
+  public getCurrentValue(): any {
     return this.source[this.fieldName]
   }
 
-  build (): ValidationError | null {
+  build(): ValidationError | null {
     if (!this.source) {
       throw new NoSourceDefined()
     }
@@ -56,30 +51,25 @@ export class ObjectValidationBuilder
 
     this.validationPipelines.forEach((validations, key) => {
       for (const { validationName, validationFn } of validations) {
-        let hasError = false
-        const result = validationFn(this.source[key])
-        const resultIsObject =
-          typeof result === 'object' && result && Object.keys(result).length
+        let result = validationFn(this.source[key])
 
-        if (result === false) {
-          hasError = true
-        } else if (resultIsObject) {
-          hasError = true
+        if (result instanceof ValidationBuilder) {
+          result = result.build()
         }
 
-        if (hasError) {
-          if (result === false) {
-            errors[key] ||= []
-            errors[key].push(validationName)
-          } else if (resultIsObject) {
-            Object.keys(result).forEach((errorKey) => {
-              const errorList = result[errorKey]
-              const concatKey = `${key}.${errorKey}`.replace(/(.*)\.$/g, '$1')
+        if (result === true) continue
 
-              errors[concatKey] ||= []
-              errors[concatKey].push(...errorList)
-            })
-          }
+        if (result === false) {
+          errors[key] ||= []
+          errors[key].push(validationName)
+        } else if (typeof result === 'object' && result !== null && !!Object.keys(result).length) {
+          Object.keys(result).forEach(errorKey => {
+            const errorList = result[errorKey]
+            const concatKey = `${key}.${errorKey}`.replace(/(.*)\.$/g, '$1')
+
+            errors[concatKey] ||= []
+            errors[concatKey].push(...errorList)
+          })
         }
       }
     })
@@ -87,9 +77,9 @@ export class ObjectValidationBuilder
     const filteredErrors = Object.keys(errors).reduce(
       (acc, k) => ({
         ...acc,
-        [k.endsWith('.$root') ? k.replace('.$root', '') : k]: errors[k]
+        [k.endsWith('.$root') ? k.replace('.$root', '') : k]: errors[k],
       }),
-      {}
+      {},
     )
 
     return Object.keys(filteredErrors).length ? filteredErrors : null

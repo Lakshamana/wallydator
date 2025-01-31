@@ -193,7 +193,7 @@ export class ValidationStage {
     callbackFn: (
       builder: ObjectValidationBuilder,
       parent: ValidationBuilder,
-    ) => ValidationError | null
+    ) => ValidationBuilder | ValidationError | null
   ): ValidationStage {
     this.builder.addValidationPipeline('validateNested', (val: Object) =>
       this.checkUndefined(val) || callbackFn(new ObjectValidationBuilder().from(val), this.builder)
@@ -205,7 +205,7 @@ export class ValidationStage {
     callbackFn: (
       builder: ArrayValidationBuilder,
       parent?: ValidationBuilder | ArrayValidationBuilder,
-    ) => ValidationError | null
+    ) => ValidationBuilder | ValidationError | null
   ): ValidationStage {
     this.builder.addValidationPipeline('validateArray', (val: any[]) =>
       this.checkUndefined(val) || callbackFn(new ArrayValidationBuilder().from(val), this.builder)

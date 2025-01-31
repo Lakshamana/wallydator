@@ -1,24 +1,18 @@
-/* eslint-disable @typescript-eslint/no-extraneous-class */
-import './config/module-alias'
 import { ArrayValidationBuilder, ObjectValidationBuilder } from './builders'
-import {
-  ArrayValidationBuilderContract,
-  ObjectValidationBuilderContract
-} from './interfaces'
 
 export { ValidationBuilder } from './builders/abstract/validation-builder'
-export { ValidationBuilderWrapper } from './types'
+export { type ValidationBuilderWrapper } from './types'
 
 export class Wallydator {
   static from (
     source: Object
-  ): ObjectValidationBuilderContract {
+  ): ObjectValidationBuilder {
     return new ObjectValidationBuilder().from(source)
   }
 
   static fromArray (
     source: any[]
-  ): ArrayValidationBuilderContract {
+  ): ArrayValidationBuilder {
     return new ArrayValidationBuilder().from(source)
   }
 }

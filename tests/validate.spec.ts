@@ -44,9 +44,7 @@ describe('Wallydator.from', () => {
       ))
       .build()
 
-    console.log({ result });
-
-    expect(result).toStrictEqual({ age: ['min'] })
+    expect(result).toStrictEqual({ age: ['min'], interests: ['includes'] })
   })
 })
 
