@@ -34,7 +34,7 @@ null  // pass
     .required()
     .isArray()
     .validateArray(array =>
-      array.root(r => r.includes('pineapple')).build()
+      array.root(r => r.includes('pineapple'))
     )
   )
   .build()
@@ -126,7 +126,6 @@ null  // pass
         builder
           .field('name', (v) => v.isString().required())
           .field('age', (v) => v.isNumber().min(18))
-          .build()
       )
   )
   .build()
@@ -146,11 +145,11 @@ Returns
 Example:
 ```ts
 > Wallydator.fromArray([])
-    .root(r => r.notEmptyArray())
+    .root(r => r.isNotEmpty())
     .build()
 
 // Notice that root validation errors will be displayed as '$root' if the source is an array, and as the field name if it's an object
-{ $root: ['notEmptyArray'] }  // error on the root
+{ $root: ['isNotEmpty'] }  // error on the root
 ```
 
 ### `for (validationFn: ValidationFunction): ArrayValidationBuilder`
@@ -197,8 +196,11 @@ Every method below will return either a `ValidationStage` or an `ArrayValidation
   - Checks whether the value is equal to a given value. It will perform a strict comparison (=== operator)
 - [notEquals](#notequals-value-validationstage)
   - Checks whether the value is not equal to a given value. It will perform a strict comparison (!== operator)
-- [notEmptyObject](#notemptyobject--validationstage)
-  - Checks whether the value is an object and it has at least one property
+- [isNotEmpty](#isnotempty--validationstage)
+  - Checks whether the value is:
+      - an object and it has at least one property
+      - an array and it's not empty
+      - not a empty string
 - [min](#min-value-validationstage)
   - Checks whether the value is greater than or equal to a given value
 - [max](#max-value-validationstage)
@@ -225,8 +227,6 @@ Every method below will return either a `ValidationStage` or an `ArrayValidation
 #### Array root validation API
 The methods below are meant to be used for the root array validation only. They will return an `ArrayValidationStage` instance.
 
-- [notEmptyArray](notemptyarray--arrayvalidationstage)
-  - Checks whether the value is an array and it has at least one element
 - [includes](#includes-value-arrayvalidationstage)
   - Checks whether the value includes a given value
 - [includesAll](#includesall-values-arrayvalidationstage)
@@ -272,7 +272,7 @@ Parameters
 
 - value `any` - The value to be compared against field value
 
-### `notEmptyObject (): ValidationStage`
+### `isNotEmpty (): ValidationStage`
 
 ### `min (value): ValidationStage`
 
@@ -337,8 +337,6 @@ Parameters
 Parameters
 
 - callbackFn `callbackFn: (builder: ObjectValidationBuilder, parent: ValidationBuilder) => ValidationError | null` - The function that will be called to validate the nested object. It receives a new `ObjectValidationBuilder` instance and the parent `ValidationBuilder` instance
-
-### `notEmptyArray (): ArrayValidationStage`
 
 ### `includes (value): ArrayValidationStage`
 
