@@ -1,4 +1,24 @@
-# Wallydator
+<p align="center"><h1 align="center">WALLYDATOR</h1></p>
+<p align="center">
+	<em><code>❯ Validation schema building made easy</code></em>
+</p>
+<p align="center">
+	<img src="https://img.shields.io/github/license/Lakshamana/wallydator?style=flat-square&logo=opensourceinitiative&logoColor=white&color=0080ff" alt="license">
+	<img src="https://img.shields.io/github/last-commit/Lakshamana/wallydator?style=flat-square&logo=git&logoColor=white&color=0080ff" alt="last-commit">
+	<img src="https://img.shields.io/github/languages/top/Lakshamana/wallydator?style=flat-square&color=0080ff" alt="repo-top-language">
+	<img src="https://img.shields.io/github/languages/count/Lakshamana/wallydator?style=flat-square&color=0080ff" alt="repo-language-count">
+</p>
+<p align="center">Built with the tools and technologies:</p>
+<p align="center">
+	<img src="https://img.shields.io/badge/npm-CB3837.svg?style=flat-square&logo=npm&logoColor=white" alt="npm">
+	<img src="https://img.shields.io/badge/Prettier-F7B93E.svg?style=flat-square&logo=Prettier&logoColor=black" alt="Prettier">
+	<img src="https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=flat-square&logo=JavaScript&logoColor=black" alt="JavaScript">
+	<img src="https://img.shields.io/badge/TypeScript-3178C6.svg?style=flat-square&logo=TypeScript&logoColor=white" alt="TypeScript">
+	<img src="https://img.shields.io/badge/ESLint-4B32C3.svg?style=flat-square&logo=ESLint&logoColor=white" alt="ESLint">
+	<img src="https://img.shields.io/badge/Jest-C21325.svg?style=flat-square&logo=Jest&logoColor=white" alt="Jest">
+</p>
+<br>
+
 
 This library is intended to serve as a flexible form validator runtime. Yes, it's a reference to [Wally Gator](https://en.wikipedia.org/wiki/Wally_Gator), just for fun =)
 
