@@ -3,6 +3,7 @@ import { ValidationBuilder } from '@/builders/abstract'
 import {
   ObjectValidationBuilderContract,
   ValidationError,
+  ValidationOptions,
   ValidationStageDescriptor,
   ValidationTestFn,
 } from '@/interfaces'
@@ -22,9 +23,13 @@ export class ObjectValidationBuilder
     this.validationPipelines.set(fieldName, [])
   }
 
-  public addValidationPipeline(validationName: string, validationFn: ValidationTestFn): void {
+  public addValidationPipeline(
+    validationName: string,
+    validationFn: ValidationTestFn,
+    opts?: ValidationOptions,
+  ): void {
     const validationPipeline = this.validationPipelines.get(this.fieldName)
-    validationPipeline?.push({ validationName, validationFn })
+    validationPipeline?.push({ validationName, validationFn, opts })
   }
 
   from(source: Object): ObjectValidationBuilder {
@@ -50,7 +55,7 @@ export class ObjectValidationBuilder
     const errors: ValidationError = {}
 
     this.validationPipelines.forEach((validations, key) => {
-      for (const { validationName, validationFn } of validations) {
+      for (const { validationName, validationFn, opts } of validations) {
         let result = validationFn(this.source[key])
 
         if (result instanceof ValidationBuilder) {
@@ -61,15 +66,15 @@ export class ObjectValidationBuilder
 
         if (result === false) {
           errors[key] ||= []
-          errors[key].push(validationName)
+          errors[key].push(opts?.message || validationName)
         } else if (typeof result === 'object' && result !== null && !!Object.keys(result).length) {
-          Object.keys(result).forEach(errorKey => {
+          for (const errorKey in result) {
             const errorList = result[errorKey]
             const concatKey = `${key}.${errorKey}`.replace(/(.*)\.$/g, '$1')
 
             errors[concatKey] ||= []
             errors[concatKey].push(...errorList)
-          })
+          }
         }
       }
     })

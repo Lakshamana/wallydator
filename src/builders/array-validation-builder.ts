@@ -2,6 +2,7 @@ import { ArrayValidationFunction, ValidationFunction } from '@/types'
 import {
   ArrayValidationBuilderContract,
   ValidationError,
+  ValidationOptions,
   ValidationStageDescriptor,
   ValidationTestFn,
 } from '@/interfaces'
@@ -25,15 +26,25 @@ export class ArrayValidationBuilder
     return this
   }
 
-  public addValidationPipeline(validationName: string, validationFn: ValidationTestFn): void {
-    this.validationPipeline.push({ validationName, validationFn })
+  public addValidationPipeline(
+    validationName: string,
+    validationFn: ValidationTestFn,
+    opts?: ValidationOptions,
+  ): void {
+    this.validationPipeline.push({ validationName, validationFn, opts })
   }
 
-  public addRootValidationPipeline(validationName: string, validationFn: ValidationTestFn): void {
-    this.rootValidationPipeline.push({ validationName, validationFn })
+  public addRootValidationPipeline(
+    validationName: string,
+    validationFn: ValidationTestFn,
+    opts?: ValidationOptions,
+  ): void {
+    this.rootValidationPipeline.push({ validationName, validationFn, opts })
   }
 
-  root(validationFn: (validator: ArrayValidationStage) => ArrayValidationStage): ArrayValidationBuilder {
+  root(
+    validationFn: (validator: ArrayValidationStage) => ArrayValidationStage,
+  ): ArrayValidationBuilder {
     validationFn(new ArrayValidationStage(this))
     return this
   }
@@ -53,7 +64,7 @@ export class ArrayValidationBuilder
     }
 
     const rootErrors: string[] = []
-    this.rootValidationPipeline.forEach(({ validationFn, validationName }) => {
+    this.rootValidationPipeline.forEach(({ validationFn, validationName, opts }) => {
       let result = validationFn(this.source)
 
       if (result instanceof ValidationBuilder) {
@@ -63,19 +74,19 @@ export class ArrayValidationBuilder
       if (result === true) return
 
       if (result === false) {
-        rootErrors.push(validationName)
+        rootErrors.push(opts?.message || validationName)
       } else if (typeof result === 'object' && !!result && Object.keys(result).length) {
         const [firstError] = Object.keys(result)
         const [validationError] = result[firstError]
 
-        rootErrors.push(validationError)
+        rootErrors.push(opts?.message || validationError)
       }
     })
 
     if (Object.keys(rootErrors).length) return { $root: rootErrors }
 
     const errors: ValidationError = {}
-    this.validationPipeline.forEach(({ validationFn, validationName }) => {
+    this.validationPipeline.forEach(({ validationFn, validationName, opts }) => {
       this.getSource().forEach((item, idx) => {
         let result = validationFn(item)
 
@@ -87,7 +98,7 @@ export class ArrayValidationBuilder
 
         if (result === false) {
           errors[idx] ||= []
-          errors[idx].push(validationName)
+          errors[idx].push(opts?.message || validationName)
         } else if (typeof result === 'object' && result !== null && !!Object.keys(result).length) {
           Object.keys(result).forEach(errorKey => {
             const errorList = result[errorKey]

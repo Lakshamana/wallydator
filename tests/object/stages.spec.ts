@@ -7,7 +7,7 @@ describe('ValidationStage', () => {
   beforeEach(() => {
     builder = {
       addValidationPipeline: jest.fn(),
-      getSource: jest.fn(() => ({}))
+      getSource: jest.fn(() => ({})),
     }
     validationStage = new ValidationStage(builder)
   })
@@ -16,7 +16,8 @@ describe('ValidationStage', () => {
     validationStage.isString()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'isString',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -24,7 +25,8 @@ describe('ValidationStage', () => {
     validationStage.isNumber()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'isNumber',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -32,7 +34,8 @@ describe('ValidationStage', () => {
     validationStage.isInteger()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'isInteger',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -40,7 +43,8 @@ describe('ValidationStage', () => {
     validationStage.isNumeric()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'isNumeric',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -48,7 +52,8 @@ describe('ValidationStage', () => {
     validationStage.isBoolean()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'isBoolean',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -56,7 +61,8 @@ describe('ValidationStage', () => {
     validationStage.isObject()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'isObject',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -64,7 +70,8 @@ describe('ValidationStage', () => {
     validationStage.isArray()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'isArray',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -72,7 +79,8 @@ describe('ValidationStage', () => {
     validationStage.isDate()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'date',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -80,7 +88,8 @@ describe('ValidationStage', () => {
     validationStage.required()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'required',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -89,7 +98,8 @@ describe('ValidationStage', () => {
     validationStage.requiredIf('someField', callbackFn)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'requiredIf',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -97,7 +107,8 @@ describe('ValidationStage', () => {
     validationStage.equals('test')
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'equals',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -105,7 +116,8 @@ describe('ValidationStage', () => {
     validationStage.notEquals('test')
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'notEquals',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -113,7 +125,8 @@ describe('ValidationStage', () => {
     validationStage.isNotEmpty()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'isNotEmpty',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -121,7 +134,8 @@ describe('ValidationStage', () => {
     validationStage.min(10)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'min',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -129,7 +143,8 @@ describe('ValidationStage', () => {
     validationStage.max(10)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'max',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -137,7 +152,8 @@ describe('ValidationStage', () => {
     validationStage.length(5)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'length',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -145,7 +161,8 @@ describe('ValidationStage', () => {
     validationStage.minLength(5)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'minLength',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -153,7 +170,8 @@ describe('ValidationStage', () => {
     validationStage.maxLength(10)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'maxLength',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -162,7 +180,8 @@ describe('ValidationStage', () => {
     validationStage.regex(pattern)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'regex',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -170,7 +189,8 @@ describe('ValidationStage', () => {
     validationStage.email()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'email',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -179,7 +199,8 @@ describe('ValidationStage', () => {
     validationStage.custom(callbackFn)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'custom',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -188,7 +209,8 @@ describe('ValidationStage', () => {
     validationStage.compareToField('field', callbackFn)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'compareToField:field',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -197,7 +219,8 @@ describe('ValidationStage', () => {
     validationStage.validateNested(callbackFn)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'validateNested',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 
@@ -206,7 +229,8 @@ describe('ValidationStage', () => {
     validationStage.validateArray(callbackFn)
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
       'validateArray',
-      expect.any(Function)
+      expect.any(Function),
+      undefined,
     )
   })
 })

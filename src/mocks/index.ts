@@ -5,12 +5,13 @@ import { Wallydator } from '..'
 const source = {
   name: 'John Doex',
   age: 16,
-  hasParentsPermission: true,
+  hasParentsPermission: false,
   email: 'john.doe@email.com',
   notEqualsThis: 'a-value',
   arrayField: [],
   nested: {
     data: 'nested data',
+    dataRequiredIf: 1,
     nested2: {
       data2: 'more nested data',
     },
@@ -26,15 +27,19 @@ const validationFn = (src: Object): ObjectValidationBuilderContract => {
       v
         .requiredIf('age', age => age < 18)
         .isBoolean()
-        .equals(true),
+        .equals(true, { message: 'should have parents permission' }),
     )
     .field('nested', v =>
       v.isObject().validateNested((nested, $parent) =>
         nested
           .field('data', vv => vv.isString().required())
           .field('dataRequiredIf', vv =>
-            vv.requiredIf('name', name => name === 'John Doe', $parent).isString(),
-           )
+            vv
+              .requiredIf('data', data => data === 'nested data' && $parent.name === 'John Doex', {
+                message: 'error message here...',
+              })
+              .isString(),
+          )
           .field('nested2', vv =>
             vv
               .isObject()
@@ -101,9 +106,13 @@ const arrayWithObjectsValidation = Wallydator.from(withArrayObject)
                 .field('age', v => v.isNumber().min(18))
                 .field('country', v => v.isString().required())
                 .field('stateCount', v =>
-                  v.custom((stateCount, $source) =>
-                    $source.country === 'USA' ? stateCount === 50 : stateCount === 26,
-                  ),
+                  v
+                    .max(1, { message: 'only with one country' })
+                    .custom(
+                      (stateCount, $source) =>
+                        $source.country === 'USA' ? stateCount === 50 : stateCount === 26,
+                      'correctStateCountry',
+                    ),
                 )
                 .field('startDate', v => v.isDate().required())
                 .field('endDate', v =>
@@ -127,7 +136,9 @@ const testArray = Wallydator.from({ fruits: ['apple', 'grapes', 'kiwi'] })
     v
       .required()
       .isArray()
-      .validateArray(array => array.root(r => r.includes('pineapple'))),
+      .validateArray(array =>
+        array.root(r => r.includes('pineapple', { message: 'you should eat pineapples' })),
+      ),
   )
   .build()
 
