@@ -78,7 +78,7 @@ describe('ValidationStage', () => {
   test('isDate should add correct validation', () => {
     validationStage.isDate()
     expect(builder.addValidationPipeline).toHaveBeenCalledWith(
-      'date',
+      'isDate',
       expect.any(Function),
       undefined,
     )

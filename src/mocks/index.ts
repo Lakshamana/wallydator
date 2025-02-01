@@ -85,7 +85,7 @@ const withArrayObject = {
       age: 16,
       country: 'BRA',
       stateCount: 27,
-      startDate: undefined,
+      startDate: 1,
       endDate: new Date('2017-03-01 00:00:00'),
     },
   ],
@@ -107,14 +107,14 @@ const arrayWithObjectsValidation = Wallydator.from(withArrayObject)
                 .field('country', v => v.isString().required())
                 .field('stateCount', v =>
                   v
-                    .max(1, { message: 'only with one country' })
+                    .max(1, { message: 'one-state country one' })
                     .custom(
                       (stateCount, $source) =>
                         $source.country === 'USA' ? stateCount === 50 : stateCount === 26,
                       'correctStateCountry',
                     ),
                 )
-                .field('startDate', v => v.isDate().required())
+                .field('startDate', v => v.isDate({ message: 'should be a valid date' }).required())
                 .field('endDate', v =>
                   v
                     .isDate()

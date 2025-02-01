@@ -72,8 +72,8 @@ export class ValidationStage {
 
   isDate(opts?: ValidationOptions): ValidationStage {
     this.builder.addValidationPipeline(
-      'date',
-      (val: any) => this.checkUndefined(val) || !!new Date(val).getDay,
+      'isDate',
+      (val: Date) => this.checkUndefined(val) || !!val.getDay,
       opts,
     )
     return this
