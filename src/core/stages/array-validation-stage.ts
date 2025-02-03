@@ -1,11 +1,11 @@
 import { ValidationOptions, ValidationTestFn } from '@/interfaces'
-import { ArrayValidationBuilder } from '@/builders'
+import { ArrayValidator } from '@/core/validators'
 
 export class ArrayValidationStage {
-  constructor (protected readonly builder: ArrayValidationBuilder) {}
+  constructor (protected readonly validator: ArrayValidator) {}
 
   isNotEmpty (opts?: ValidationOptions): ArrayValidationStage {
-    this.builder.addRootValidationPipeline(
+    this.validator.addRootValidationPipeline(
       'isNotEmpty',
       (val: any[]) => !!val.length,
       opts
@@ -14,7 +14,7 @@ export class ArrayValidationStage {
   }
 
   includes (value: any, opts?: ValidationOptions): ArrayValidationStage {
-    this.builder.addRootValidationPipeline('includes', (val: any[]) =>
+    this.validator.addRootValidationPipeline('includes', (val: any[]) =>
       val.includes(value),
       opts
     )
@@ -22,7 +22,7 @@ export class ArrayValidationStage {
   }
 
   includesAll (values: any[], opts?: ValidationOptions): ArrayValidationStage {
-    this.builder.addRootValidationPipeline('includesAll', (val: any[]) =>
+    this.validator.addRootValidationPipeline('includesAll', (val: any[]) =>
       values.every((value) => val.includes(value)),
       opts
     )
@@ -30,7 +30,7 @@ export class ArrayValidationStage {
   }
 
   every (callbackFn: (val: any) => boolean, opts?: ValidationOptions): ArrayValidationStage {
-    this.builder.addRootValidationPipeline('every', (val: any[]) =>
+    this.validator.addRootValidationPipeline('every', (val: any[]) =>
       val.every(callbackFn),
       opts
     )
@@ -38,7 +38,7 @@ export class ArrayValidationStage {
   }
 
   some (callbackFn: ValidationTestFn, opts?: ValidationOptions): ArrayValidationStage {
-    this.builder.addRootValidationPipeline('some', (val: any[]) =>
+    this.validator.addRootValidationPipeline('some', (val: any[]) =>
       val.some(callbackFn),
       opts
     )
@@ -46,7 +46,7 @@ export class ArrayValidationStage {
   }
 
   length (length: number, opts?: ValidationOptions): ArrayValidationStage {
-    this.builder.addRootValidationPipeline(
+    this.validator.addRootValidationPipeline(
       'length',
       (val: string) => val.length === length,
       opts
@@ -56,7 +56,7 @@ export class ArrayValidationStage {
   }
 
   minLength (min: number, opts?: ValidationOptions): ArrayValidationStage {
-    this.builder.addRootValidationPipeline(
+    this.validator.addRootValidationPipeline(
       'minLength',
       (val: string | any[]) => val.length >= min,
       opts
@@ -65,7 +65,7 @@ export class ArrayValidationStage {
   }
 
   maxLength (max: number, opts?: ValidationOptions): ArrayValidationStage {
-    this.builder.addRootValidationPipeline(
+    this.validator.addRootValidationPipeline(
       'maxLength',
       (val: string | any[]) => val.length <= max,
       opts

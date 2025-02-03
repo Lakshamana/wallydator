@@ -1,1 +1,1 @@
-export { Wallydator, ValidationBuilder, ValidationBuilderWrapper } from './src'
+export { Wallydator } from './src'

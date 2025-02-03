@@ -1,4 +1,4 @@
-import { ArrayValidationStage, ValidationStage } from '@/builders/stages'
+import { ArrayValidationStage, ValidationStage } from '@/core/stages'
 
 export type ValidationFunction = (validator: ValidationStage) => ValidationStage
 

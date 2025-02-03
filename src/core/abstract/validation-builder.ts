@@ -1,13 +1,12 @@
 import { ValidationError, ValidationOptions, ValidationTestFn } from '@/interfaces'
 
-export abstract class ValidationBuilder {
+export abstract class Validator {
   protected source: any | any[] = null
 
   public abstract addValidationPipeline(
     validationName: string,
     validationFn: ValidationTestFn,
     opts?: ValidationOptions,
-    message?: string,
   ): void
 
   public abstract build(): ValidationError | null

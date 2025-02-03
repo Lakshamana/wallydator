@@ -1,16 +1,18 @@
-import { ValidationBuilder } from '@/builders/abstract'
-import { ArrayValidationBuilder, ObjectValidationBuilder } from '@/builders'
 import { ValidationError, ValidationOptions } from '@/interfaces'
+import { ObjectValidator } from '@/core/validators/object-validator'
+import { ArrayValidationBuilder, ObjectValidationBuilder } from '../builders'
+import { ArrayValidator } from '../validators'
+import { Validator } from '@/core/abstract'
 
 export class ValidationStage {
-  constructor(protected readonly builder: ValidationBuilder) {}
+  constructor(protected readonly validator: Validator) {}
 
   private checkUndefined(val: any): boolean {
     return val === undefined
   }
 
   isString(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'isString',
       (val: any) => this.checkUndefined(val) || typeof val === 'string',
       opts,
@@ -19,7 +21,7 @@ export class ValidationStage {
   }
 
   isNumber(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'isNumber',
       (val: any) => this.checkUndefined(val) || typeof val === 'number',
       opts,
@@ -28,7 +30,7 @@ export class ValidationStage {
   }
 
   isInteger(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'isInteger',
       (val: any) => this.checkUndefined(val) || (!isNaN(val) && Number.isInteger(val)),
       opts,
@@ -37,12 +39,12 @@ export class ValidationStage {
   }
 
   isNumeric(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline('isNumeric', isNaN, opts)
+    this.validator.addValidationPipeline('isNumeric', isNaN, opts)
     return this
   }
 
   isBoolean(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'isBoolean',
       (val: any) => this.checkUndefined(val) || typeof val === 'boolean',
       opts,
@@ -51,7 +53,7 @@ export class ValidationStage {
   }
 
   isObject(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'isObject',
       (val: any) =>
         this.checkUndefined(val) ||
@@ -62,7 +64,7 @@ export class ValidationStage {
   }
 
   isArray(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'isArray',
       (val: any) => this.checkUndefined(val) || (typeof val === 'object' && Array.isArray(val)),
       opts,
@@ -71,7 +73,7 @@ export class ValidationStage {
   }
 
   isDate(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'isDate',
       (val: Date) => this.checkUndefined(val) || !!val.getDay,
       opts,
@@ -80,7 +82,7 @@ export class ValidationStage {
   }
 
   required(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'required',
       (val: any) => !['', null, undefined].includes(val),
       opts,
@@ -93,17 +95,17 @@ export class ValidationStage {
     callbackFn: (value: any) => boolean,
     opts?: ValidationOptions,
   ): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'requiredIf',
       (val: any) =>
-        !callbackFn(this.builder.getSource()[field]) || !['', null, undefined].includes(val),
+        !callbackFn(this.validator.getSource()[field]) || !['', null, undefined].includes(val),
       opts,
     )
     return this
   }
 
   equals(equalsValue: any, opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'equals',
       (val: any) => [equalsValue, undefined].includes(val),
       opts,
@@ -112,12 +114,12 @@ export class ValidationStage {
   }
 
   notEquals(value: any, opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline('notEquals', (val: any) => val !== value, opts)
+    this.validator.addValidationPipeline('notEquals', (val: any) => val !== value, opts)
     return this
   }
 
   isNotEmpty(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'isNotEmpty',
       (val: object | Array<any> | string) => {
         if (this.checkUndefined(val)) {
@@ -140,68 +142,68 @@ export class ValidationStage {
   }
 
   min(minValue: number | Date, opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'min',
       (val: number | Date) => this.checkUndefined(val) || val >= minValue,
-      opts
+      opts,
     )
     return this
   }
 
   max(maxValue: number | Date, opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'max',
       (val: number | Date) => this.checkUndefined(val) || val <= maxValue,
-      opts
+      opts,
     )
     return this
   }
 
   length(length: number, opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'length',
       (val: string) => this.checkUndefined(val) || val.length === length,
-      opts
+      opts,
     )
     return this
   }
 
   minLength(min: number, opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'minLength',
       (val: string) => this.checkUndefined(val) || val.length >= min,
-      opts
+      opts,
     )
     return this
   }
 
   maxLength(max: number, opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'maxLength',
       (val: string) => this.checkUndefined(val) || val.length <= max,
-      opts
+      opts,
     )
     return this
   }
 
   regex(pattern: RegExp, opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'regex',
       (val: string) => this.checkUndefined(val) || pattern.test(val),
-      opts
+      opts,
     )
     return this
   }
 
   email(opts?: ValidationOptions): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'email',
       (val: string) =>
         this.checkUndefined(val) ||
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
           String(val).toLowerCase(),
         ),
-      opts
+      opts,
     )
     return this
   }
@@ -212,10 +214,10 @@ export class ValidationStage {
     opts?: ValidationOptions,
   ): ValidationStage {
     const useLabel = label ? `custom:${label}` : 'custom'
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       useLabel,
-      val => this.checkUndefined(val) || callbackFn(val, this.builder.getSource()),
-      opts
+      val => this.checkUndefined(val) || callbackFn(val, this.validator.getSource()),
+      opts,
     )
     return this
   }
@@ -226,14 +228,14 @@ export class ValidationStage {
     label?: string,
     opts?: ValidationOptions,
   ): ValidationStage {
-    const compareAgainstValue = this.builder.getSource()[field]
-    this.builder.addValidationPipeline(
+    const compareAgainstValue = this.validator.getSource()[field]
+    this.validator.addValidationPipeline(
       `compareToField:${label ?? field}`,
       (val: any) =>
         this.checkUndefined(val) ||
         this.checkUndefined(compareAgainstValue) ||
         callbackFn(val, compareAgainstValue),
-      opts
+      opts,
     )
     return this
   }
@@ -242,14 +244,17 @@ export class ValidationStage {
     callbackFn: (
       builder: ObjectValidationBuilder,
       parent: any,
-    ) => ValidationBuilder | ValidationError | null,
+    ) => ObjectValidationBuilder | ValidationError | null,
     opts?: ValidationOptions,
   ): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'validateNested',
       (val: Object) =>
         this.checkUndefined(val) ||
-        callbackFn(new ObjectValidationBuilder().from(val), this.builder.getSource()),
+        callbackFn(
+          new ObjectValidationBuilder(new ObjectValidator()).from(val),
+          this.validator.getSource(),
+        ),
       opts,
     )
     return this
@@ -259,14 +264,17 @@ export class ValidationStage {
     callbackFn: (
       builder: ArrayValidationBuilder,
       parent?: any[],
-    ) => ValidationBuilder | ValidationError | null,
+    ) => ArrayValidationBuilder | ValidationError | null,
     opts?: ValidationOptions,
   ): ValidationStage {
-    this.builder.addValidationPipeline(
+    this.validator.addValidationPipeline(
       'validateArray',
       (val: any[]) =>
         this.checkUndefined(val) ||
-        callbackFn(new ArrayValidationBuilder().from(val), this.builder.getSource() as any[]),
+        callbackFn(
+          new ArrayValidationBuilder(new ArrayValidator()).from(val),
+          this.validator.getSource() as any[],
+        ),
       opts,
     )
     return this

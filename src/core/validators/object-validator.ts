@@ -1,19 +1,16 @@
-import { ValidationFunction } from '@/types'
-import { ValidationBuilder } from '@/builders/abstract'
+import { Validator } from '@/core/abstract'
 import {
-  ObjectValidationBuilderContract,
   ValidationError,
+  ValidationFunction,
   ValidationOptions,
   ValidationStageDescriptor,
   ValidationTestFn,
 } from '@/interfaces'
 import { NoSourceDefined } from '@/errors'
-import { ValidationStage } from './stages'
+import { ValidationStage } from '../stages'
+import { ValidationBuilder } from '../builders/validation-builder'
 
-export class ObjectValidationBuilder
-  extends ValidationBuilder
-  implements ObjectValidationBuilderContract
-{
+export class ObjectValidator extends Validator {
   protected readonly validationPipelines: Map<string, ValidationStageDescriptor[]> = new Map([])
 
   protected fieldName: string = ''
@@ -21,6 +18,11 @@ export class ObjectValidationBuilder
   public setNewValidationPipeline(fieldName: string): void {
     this.fieldName = fieldName
     this.validationPipelines.set(fieldName, [])
+  }
+
+  from(source: Object): ObjectValidator {
+    this.source = source
+    return this
   }
 
   public addValidationPipeline(
@@ -32,15 +34,9 @@ export class ObjectValidationBuilder
     validationPipeline?.push({ validationName, validationFn, opts })
   }
 
-  from(source: Object): ObjectValidationBuilder {
-    this.source = source
-    return this
-  }
-
-  field(fieldName: string, validationFn: ValidationFunction): ObjectValidationBuilder {
+  field(fieldName: string, validationFn: ValidationFunction) {
     this.setNewValidationPipeline(fieldName)
     validationFn(new ValidationStage(this))
-    return this
   }
 
   public getCurrentValue(): any {
@@ -66,7 +62,14 @@ export class ObjectValidationBuilder
 
         if (result === false) {
           errors[key] ||= []
-          errors[key].push(opts?.message || validationName)
+
+          let useMessage = ''
+          if (opts?.message) {
+            useMessage =
+              typeof opts.message === 'function' ? opts.message(this.source[key]) : opts.message
+          }
+
+          errors[key].push(useMessage || validationName)
         } else if (typeof result === 'object' && result !== null && !!Object.keys(result).length) {
           for (const errorKey in result) {
             const errorList = result[errorKey]

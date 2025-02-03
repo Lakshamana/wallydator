@@ -1,4 +1,4 @@
-import { ValidationStage } from '@/builders/stages'
+import { ValidationStage } from '@/core/stages'
 
 describe('ValidationStage', () => {
   let builder: any

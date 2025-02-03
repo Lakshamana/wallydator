@@ -1,3 +1,3 @@
 export interface ValidationOptions {
-  message?: string
+  message?: string | ((val: any) => string)
 }

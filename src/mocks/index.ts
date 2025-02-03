@@ -1,14 +1,42 @@
-import { ObjectValidationBuilderContract, ValidationError } from '@/interfaces'
-import { ValidationBuilderWrapper } from '@/types'
+import { ValidationError } from '@/interfaces'
+import { ValidationBuilder } from '@/core/builders'
 import { Wallydator } from '..'
 
-const source = {
+interface SourceDto {
+  name: string
+  age: number
+  hasParentsPermission: boolean
+  email: string
+  notEqualsThis: string
+  arrayField: any[]
+  maybeValidateThisEmbedded: MaybeValidateThisEmbedded
+  nested: Nested
+}
+
+interface MaybeValidateThisEmbedded {
+  maybe: boolean
+}
+
+interface Nested {
+  data: string
+  dataRequiredIf: number
+  nested2: Nested2
+}
+
+interface Nested2 {
+  data2: string
+}
+
+const source: SourceDto = {
   name: 'John Doex',
   age: 16,
   hasParentsPermission: false,
   email: 'john.doe@email.com',
   notEqualsThis: 'a-value',
   arrayField: [],
+  maybeValidateThisEmbedded: {
+    maybe: false,
+  },
   nested: {
     data: 'nested data',
     dataRequiredIf: 1,
@@ -18,8 +46,8 @@ const source = {
   },
 }
 
-const validationFn = (src: Object): ObjectValidationBuilderContract => {
-  return Wallydator.from(src)
+const validationFn = (src: SourceDto): ValidationBuilder => {
+  const validation = Wallydator.from(src)
     .field('name', v => v.isString().required().equals('John Doe'))
     .field('age', v => v.required().isNumber())
     .field('email', v => v.isString().required().email())
@@ -30,12 +58,12 @@ const validationFn = (src: Object): ObjectValidationBuilderContract => {
         .equals(true, { message: 'should have parents permission' }),
     )
     .field('nested', v =>
-      v.isObject().validateNested((nested, $parent) =>
+      v.isObject().validateNested((nested, $root: SourceDto) =>
         nested
           .field('data', vv => vv.isString().required())
           .field('dataRequiredIf', vv =>
             vv
-              .requiredIf('data', data => data === 'nested data' && $parent.name === 'John Doex', {
+              .requiredIf('data', data => data === 'nested data' && $root.name === 'John Doex', {
                 message: 'error message here...',
               })
               .isString(),
@@ -43,7 +71,9 @@ const validationFn = (src: Object): ObjectValidationBuilderContract => {
           .field('nested2', vv =>
             vv
               .isObject()
-              .validateNested(nested2 => nested2.field('dataError', vvv => vvv.required())),
+              .validateNested((nested2, $parentNested: Nested) =>
+                $parentNested.data ? nested2.field('dataError', vvv => vvv.required()) : null,
+              ),
           ),
       ),
     )
@@ -55,11 +85,23 @@ const validationFn = (src: Object): ObjectValidationBuilderContract => {
         .minLength(1)
         .validateArray(array => array.for(item => item.min(3))),
     )
+
+  if ('maybeValidateThisEmbedded' in src) {
+    validation.field('maybeValidateThisEmbedded', v =>
+      v.validateNested(builder =>
+        builder.field('maybe', maybe =>
+          maybe.required().equals(true, { message: 'should be true' }),
+        ),
+      ),
+    )
+  }
+
+  return validation
 }
 
 function checkValidation(
-  src: Object,
-  validationWrapper: ValidationBuilderWrapper,
+  src: any,
+  validationWrapper: (s: any) => ValidationBuilder,
 ): ValidationError | null {
   return validationWrapper(src).build()
 }

@@ -1,19 +1,15 @@
-import { ArrayValidationFunction, ValidationFunction } from '@/types'
 import {
-  ArrayValidationBuilderContract,
   ValidationError,
   ValidationOptions,
   ValidationStageDescriptor,
   ValidationTestFn,
 } from '@/interfaces'
-import { ValidationBuilder } from '@/builders/abstract'
-import { ArrayValidationStage, ValidationStage } from '@/builders/stages'
+import { Validator } from '@/core/abstract'
+import { ArrayValidationStage, ValidationStage } from '@/core/stages'
 import { NoSourceDefined } from '@/errors'
+import { ValidationBuilder } from '../builders/validation-builder'
 
-export class ArrayValidationBuilder
-  extends ValidationBuilder
-  implements ArrayValidationBuilderContract
-{
+export class ArrayValidator extends Validator {
   private readonly validationPipeline: ValidationStageDescriptor[] = []
   private readonly rootValidationPipeline: ValidationStageDescriptor[] = []
 
@@ -21,7 +17,7 @@ export class ArrayValidationBuilder
     return this.source
   }
 
-  from(source?: any[]): ArrayValidationBuilder {
+  from(source?: any[]): ArrayValidator {
     this.source = source
     return this
   }
@@ -42,16 +38,12 @@ export class ArrayValidationBuilder
     this.rootValidationPipeline.push({ validationName, validationFn, opts })
   }
 
-  root(
-    validationFn: (validator: ArrayValidationStage) => ArrayValidationStage,
-  ): ArrayValidationBuilder {
+  root(validationFn: (validator: ArrayValidationStage) => ArrayValidationStage) {
     validationFn(new ArrayValidationStage(this))
-    return this
   }
 
-  for(validationFn: (validator: ValidationStage) => ValidationStage): ArrayValidationBuilder {
+  for(validationFn: (validator: ValidationStage) => ValidationStage) {
     validationFn(new ValidationStage(this))
-    return this
   }
 
   public getCurrentValue(): any {
@@ -73,13 +65,18 @@ export class ArrayValidationBuilder
 
       if (result === true) return
 
+      let message = ''
+      if (opts?.message) {
+        message = typeof opts.message === 'function' ? opts.message(this.source) : opts.message
+      }
+
       if (result === false) {
-        rootErrors.push(opts?.message || validationName)
+        rootErrors.push(message || validationName)
       } else if (typeof result === 'object' && !!result && Object.keys(result).length) {
         const [firstError] = Object.keys(result)
         const [validationError] = result[firstError]
 
-        rootErrors.push(opts?.message || validationError)
+        rootErrors.push(message || validationError)
       }
     })
 
@@ -96,9 +93,14 @@ export class ArrayValidationBuilder
 
         if (result === true) return
 
+        let message = ''
+        if (opts?.message) {
+          message = typeof opts.message === 'function' ? opts.message(this.source) : opts.message
+        }
+
         if (result === false) {
           errors[idx] ||= []
-          errors[idx].push(opts?.message || validationName)
+          errors[idx].push(message || validationName)
         } else if (typeof result === 'object' && result !== null && !!Object.keys(result).length) {
           Object.keys(result).forEach(errorKey => {
             const errorList = result[errorKey]
